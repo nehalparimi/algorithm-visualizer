@@ -1,0 +1,7 @@
+.graph {
+    display: grid;
+    grid-template-columns: repeat(10, 2em);
+    grid-template-rows: repeat(10, 2em);
+    width: 50vw;
+    height: 50vh;
+}

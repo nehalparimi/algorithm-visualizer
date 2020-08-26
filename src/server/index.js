@@ -5,13 +5,13 @@ const app = express();
 
 app.use(express.static('dist'));
 
-app.get('/', (req, res) => {
+app.get('/api/*', (req, res) => {
     res.send(os.userInfo());
 })
 
-app.get("/api/getUsername", (req, res) => {
-    res.send({ username: os.userInfo().username });
-});
+// app.get("/api/getUsername", (req, res) => {
+//     res.send({ username: os.userInfo().username });
+// });
 
 app.listen(8080, () => {
     console.log("Listening on port 8080");
