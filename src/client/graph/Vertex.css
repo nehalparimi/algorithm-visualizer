@@ -1,5 +1,11 @@
-.node {
-    border: 1px solid black;
-    height: 1.5em;
-    width: 1.5em;
+.unvisited {
+    background-color: white;
+}
+
+.visited {
+    background-color: grey;
+}
+
+.target {
+    background-color: black;
 }
