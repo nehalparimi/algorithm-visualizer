@@ -4,15 +4,20 @@ import Graph from './graph/Graph';
 class App extends Component {
     state = { username: null };
 
-    componentDidMount() {
-        fetch('/api/user')
-            .then(res => res.json())
-            .then(user => this.setState({ username: user.username}));
-    }
-
     render() {
         return(
-            <Graph />
+            <div className="main">
+                <div className="nav">
+                    <ul style={{ display: 'flex', listStyle: 'none' }}>
+                        <li>Item 1</li>
+                        <li>Item 1</li>
+                        <li>Item 1</li>
+                        <li>Item 1</li>
+                        <li>Item 1</li>
+                    </ul>
+                </div>
+                <Graph />
+            </div>
         )
     }
 }

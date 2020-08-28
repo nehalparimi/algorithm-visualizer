@@ -24,10 +24,11 @@ class Graph extends Component {
             let arr = [];
             for (let j = 0; j < 30; ++j) {
                 if (i == this.state.s_x && j == this.state.s_y){
-                    arr.push(-2);
+                    
+                    arr.push({ visited: -2, parent: null, inPath: 0 });
                     continue;
                 }
-                arr.push(0); 
+                arr.push({ visited: 0, parent: null, inPath: 0 });
             }
             graph.push(arr);
         }
@@ -56,13 +57,15 @@ class Graph extends Component {
         function isValid(x, y) {
             return x >= 0 && x < graph.length 
                 && y >= 0 && y < graph[x].length
-                && !visited[x][y]
+                && !visited[x][y].visited
         }
 
         const q = [];
         const start = new Coordinate(startX, startY);
 
-        visited[start.x][start.y] = -2;
+        visited[start.x][start.y].visited = -2;
+        visited[start.x][start.y].parent = null;
+        visited[start.x][start.y].inPath = 1;
         this.setState({
             graph: visited
         });
@@ -78,14 +81,33 @@ class Graph extends Component {
             for (const arr of shift) {
                 if (isValid(x + arr[0], y + arr[1])) {
                     let validNeighbor = new Coordinate(x + arr[0], y + arr[1]);
-                    visited[validNeighbor.x][validNeighbor.y] = 1;
+                    visited[validNeighbor.x][validNeighbor.y].visited = 1;
+                    visited[validNeighbor.x][validNeighbor.y].parent = current;
                     
                     this.setState({
                         graph: visited,
                     });
 
                     if (validNeighbor.x === endX && validNeighbor.y === endY) {
-                        visited[validNeighbor.x][validNeighbor.y] = -1;
+                        visited[validNeighbor.x][validNeighbor.y].visited = -1;
+                        this.setState({ graph: visited });
+                        
+
+                        let path_x, path_y;
+                        let path_current = validNeighbor;
+
+                        while (path_current) {
+                            path_x = path_current.x;
+                            path_y = path_current.y;
+
+                            visited[path_x][path_y].inPath = 1;
+                            this.setState({ graph: visited });
+                            path_current = graph[path_current.x][path_current.y].parent;
+                        }
+
+                        this.setState({
+                            graph: visited,
+                        });
                         return true;
                     }
                     q.push(validNeighbor);
@@ -98,34 +120,45 @@ class Graph extends Component {
     }
 
     pickNode(event) {
-        console.log(event.target.getAttribute('x'));
         this.setState({
             e_x: parseInt(event.target.getAttribute('x')),
             e_y: parseInt(event.target.getAttribute('y')),
         });
+
+        let { s_x, s_y, e_x, e_y } = this.state;
+
+        if (e_x != Infinity && e_y != Infinity) {
+            this.bfs(s_x, s_y, e_x, e_y);
+        }
     }
     render() {
-        let { s_x, s_y, e_x, e_y } = this.state;
-        console.log(s_x, s_y, e_x, e_y)
-        let disabled;
-        if (s_x === Infinity || s_y === Infinity || e_x === Infinity || e_y === Infinity) 
-            disabled = true
-        else disabled = false;
         return (
-            <div>
+            <div className="container">
                 <div className="graph" onClick={(e) => this.pickNode(e)}>
                     { this.state.graph.map((arr, i) => {
-                        return arr.map((str, j) => {
+                        return arr.map(({visited, parent, inPath}, j) => {
                             let classname;
-                            if (str === -2) classname = 'start';
-                            if (str === 0) classname = 'unvisited';
-                            if (str === 1) classname = 'visited';
-                            if (str === -1) classname = 'finish';
+                            switch (visited) {
+                                case -1:
+                                    classname = 'finish';
+                                    break;
+                                case -2:
+                                    classname = 'start';
+                                    break;
+                                case 0:
+                                    classname = 'unvisited';
+                                    break;
+                                case 1:
+                                    classname = 'visited'
+                                    break;
+                                default:
+                                    break;
+                            }
+                            if (inPath) classname += ' inPath';
                             return <Vertex key={i + j} x={i} y={j} className={classname} />
                         })
                     }) }                
                 </div>
-                <button className="runButton" onClick={() => this.bfs(s_x, s_y, e_x, e_y)} disabled={disabled}>Run BFS</button>
                 <button className="runButton" onClick={this.generateGraph}>Reset</button>
             </div>
             
