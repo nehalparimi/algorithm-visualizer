@@ -17,3 +17,7 @@
 .inPath {
     background-color: rgb(255, 232, 21);
 }
+
+.wall {
+    background-color: black;
+}

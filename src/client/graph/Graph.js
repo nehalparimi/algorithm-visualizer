@@ -25,10 +25,11 @@ class Graph extends Component {
             for (let j = 0; j < 30; ++j) {
                 if (i == this.state.s_x && j == this.state.s_y){
                     
-                    arr.push({ visited: -2, parent: null, inPath: 0 });
+                    arr.push({ visited: -2, parent: null, inPath: 0, wall: 0 });
                     continue;
                 }
-                arr.push({ visited: 0, parent: null, inPath: 0 });
+                let t = Math.random() > 0.75 ? true : false
+                arr.push({ visited: 0, parent: null, inPath: 0, wall: t });
             }
             graph.push(arr);
         }
@@ -58,6 +59,7 @@ class Graph extends Component {
             return x >= 0 && x < graph.length 
                 && y >= 0 && y < graph[x].length
                 && !visited[x][y].visited
+                && !visited[x][y].wall
         }
 
         const q = [];
@@ -136,7 +138,7 @@ class Graph extends Component {
             <div className="container">
                 <div className="graph" onClick={(e) => this.pickNode(e)}>
                     { this.state.graph.map((arr, i) => {
-                        return arr.map(({visited, parent, inPath}, j) => {
+                        return arr.map(({visited, parent, inPath, wall}, j) => {
                             let classname;
                             switch (visited) {
                                 case -1:
@@ -155,6 +157,7 @@ class Graph extends Component {
                                     break;
                             }
                             if (inPath) classname += ' inPath';
+                            if (wall) classname += ' wall';
                             return <Vertex key={i + j} x={i} y={j} className={classname} />
                         })
                     }) }                
