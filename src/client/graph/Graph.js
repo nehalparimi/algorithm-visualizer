@@ -2,6 +2,8 @@ import React, { Component } from 'react'
 import Vertex from './Vertex'
 import './Graph.css'
 
+import Stack from '../algorithms/stack'
+
 class Graph extends Component {
     constructor() {
         super();
@@ -28,7 +30,7 @@ class Graph extends Component {
                     arr.push({ visited: -2, parent: null, inPath: 0, wall: 0 });
                     continue;
                 }
-                let t = Math.random() > 0.75 ? true : false
+                let t = !!(Math.random() > 0.75);
                 arr.push({ visited: 0, parent: null, inPath: 0, wall: t });
             }
             graph.push(arr);
@@ -121,6 +123,80 @@ class Graph extends Component {
         return false;
     }
 
+    dfs(startX, startY, endX, endY) {
+        const { graph } = this.state;
+        let visited = [...graph];
+
+        function Coordinate(x, y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        function isValid(x, y) {
+            return x >= 0 && x < graph.length
+                && y >= 0 && y < graph[x].length
+                && !visited[x][y].visited
+                && !visited[x][y].wall
+        }
+
+        const stack = new Stack;
+        const start = new Coordinate(startX, startY);
+
+        visited[start.x][start.y].visited = -2;
+        visited[start.x][start.y].parent = null;
+        visited[start.x][start.y].inPath = 1;
+        this.setState({
+            graph: visited
+        });
+
+        stack.push(start);
+
+        while (!stack.empty()){
+            let current = stack.returnFirst();
+            let { x, y } = current;
+
+            stack.pop();
+
+            const shift = [[0, 1], [1, 0], [0, -1], [-1, 0]];
+            for (const arr of shift) {
+                if (isValid(x + arr[0], y + arr[1])) {
+                    let validNeighbor = new Coordinate(x + arr[0], y + arr[1]);
+                    visited[validNeighbor.x][validNeighbor.y].visited = 1;
+                    visited[validNeighbor.x][validNeighbor.y].parent = current;
+
+                    this.setState({
+                        graph: visited,
+                    });
+
+                    if (validNeighbor.x === endX && validNeighbor.y === endY) {
+                        visited[validNeighbor.x][validNeighbor.y].visited = -1;
+                        this.setState({ graph: visited });
+
+
+                        let path_x, path_y;
+                        let path_current = validNeighbor;
+
+                        while (path_current) {
+                            path_x = path_current.x;
+                            path_y = path_current.y;
+
+                            visited[path_x][path_y].inPath = 1;
+                            this.setState({ graph: visited });
+                            path_current = graph[path_current.x][path_current.y].parent;
+                        }
+
+                        this.setState({
+                            graph: visited,
+                        });
+                        return true;
+                    }
+                    stack.push(validNeighbor);
+                }
+            }
+        }
+        return false;
+    }
+
     pickNode(event) {
         this.setState({
             e_x: parseInt(event.target.getAttribute('x')),
@@ -130,7 +206,7 @@ class Graph extends Component {
         let { s_x, s_y, e_x, e_y } = this.state;
 
         if (e_x != Infinity && e_y != Infinity) {
-            this.bfs(s_x, s_y, e_x, e_y);
+            this.dfs(s_x, s_y, e_x, e_y);
         }
     }
     render() {
