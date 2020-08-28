@@ -6,6 +6,10 @@
     background-color: grey;
 }
 
-.target {
-    background-color: black;
+.start {
+    background-color: blue;
+}
+
+.finish {
+    background-color: red;
 }

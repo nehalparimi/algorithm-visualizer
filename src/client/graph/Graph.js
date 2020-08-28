@@ -7,10 +7,15 @@ class Graph extends Component {
         super();
 
         this.state = {
+            s_x: 4,
+            s_y: 5,
+            e_x: Infinity,
+            e_y: Infinity,
             graph: []
         }
         this.generateGraph = this.generateGraph.bind(this);
         this.bfs = this.bfs.bind(this); 
+        this.pickNode = this.pickNode.bind(this);
     }
 
     generateGraph() {
@@ -18,11 +23,21 @@ class Graph extends Component {
         for (let i = 0; i < 10; i++) {
             let arr = [];
             for (let j = 0; j < 30; ++j) {
-                arr.push(<Vertex key={i + j} x={i} y={j} className='unvisited' />); 
+                if (i == this.state.s_x && j == this.state.s_y){
+                    arr.push(-2);
+                    continue;
+                }
+                arr.push(0); 
             }
             graph.push(arr);
         }
-        this.setState({ graph });
+        this.setState({ 
+            graph: graph,
+            s_x: 4,
+            s_y: 5,
+            e_x: Infinity,
+            e_y: Infinity,
+         });
     }
 
     componentDidMount() {
@@ -30,68 +45,88 @@ class Graph extends Component {
     }
 
     bfs(startX, startY, endX, endY) {
-        let { graph } = this.state;
-        let visited = [];
+        const { graph } = this.state;
+        let visited = [...graph];
 
-        for (let i = 0; i < graph.length; ++i) {
-            let arr = [];
-
-            for (let j = 0; j < graph[i].length; ++j) {
-                arr.push(0);
-            }
-            visited.push(arr);
+        function Coordinate(x, y) {
+            this.x = x;
+            this.y = y;
         }
 
-        function checkIfValid(x, y) {
-            return x >= 0 && x < graph.length
+        function isValid(x, y) {
+            return x >= 0 && x < graph.length 
                 && y >= 0 && y < graph[x].length
                 && !visited[x][y]
-        } 
+        }
 
-        let start = graph[startX][startY];
+        const q = [];
+        const start = new Coordinate(startX, startY);
 
-        let queue = [];
-        queue.push(start);
-        visited[startX][startY] = 1;
-     
-        let queueIter = 0;
+        visited[start.x][start.y] = -2;
+        this.setState({
+            graph: visited
+        });
 
-        while (queueIter < queue.length) {
-            let current = queue[queueIter];
-            let { x, y } = current.props;
-            let dupGraph = graph;
+        q.push(start);
+        let qIter = 0;
 
-            // if (x == endX && y === endY) return true;
+        while (qIter < q.length) {
+            let current = q[qIter];
+            let { x, y } = current;
 
+            const shift = [[0, 1], [1, 0], [0, -1], [-1, 0]];
+            for (const arr of shift) {
+                if (isValid(x + arr[0], y + arr[1])) {
+                    let validNeighbor = new Coordinate(x + arr[0], y + arr[1]);
+                    visited[validNeighbor.x][validNeighbor.y] = 1;
+                    
+                    this.setState({
+                        graph: visited,
+                    });
 
-            let shift = [[0, 1], [1, 0], [0, -1], [-1, 0]];
-            for (let arr of shift) {
-                let xCoor = x + arr[0];
-                let yCoor = y + arr[1];
-                if (checkIfValid(xCoor, yCoor)) {
-                    let validNeighbor = graph[xCoor][yCoor];
-                    visited[xCoor][yCoor] = 1;
-                    if (validNeighbor.props.x == endX && validNeighbor.props.y == endY) return true;
-                    queue.push(validNeighbor);
+                    if (validNeighbor.x === endX && validNeighbor.y === endY) {
+                        visited[validNeighbor.x][validNeighbor.y] = -1;
+                        return true;
+                    }
+                    q.push(validNeighbor);
+                    
                 }
             }
-            console.log(dupGraph[x][y].props.className);
-            
-                this.setState({
-                    graph: dupGraph,
-                });
-            
-            queueIter++;
+            qIter++;
         }
         return false;
     }
 
+    pickNode(event) {
+        console.log(event.target.getAttribute('x'));
+        this.setState({
+            e_x: parseInt(event.target.getAttribute('x')),
+            e_y: parseInt(event.target.getAttribute('y')),
+        });
+    }
     render() {
-        const { graph } = this.state;
+        let { s_x, s_y, e_x, e_y } = this.state;
+        console.log(s_x, s_y, e_x, e_y)
+        let disabled;
+        if (s_x === Infinity || s_y === Infinity || e_x === Infinity || e_y === Infinity) 
+            disabled = true
+        else disabled = false;
         return (
-            <div className="graph">
-                { graph }
-                <button className="runButton" onClick={() => this.bfs(0, 0, 5, 6)}>Run BFS</button>
+            <div>
+                <div className="graph" onClick={(e) => this.pickNode(e)}>
+                    { this.state.graph.map((arr, i) => {
+                        return arr.map((str, j) => {
+                            let classname;
+                            if (str === -2) classname = 'start';
+                            if (str === 0) classname = 'unvisited';
+                            if (str === 1) classname = 'visited';
+                            if (str === -1) classname = 'finish';
+                            return <Vertex key={i + j} x={i} y={j} className={classname} />
+                        })
+                    }) }                
+                </div>
+                <button className="runButton" onClick={() => this.bfs(s_x, s_y, e_x, e_y)} disabled={disabled}>Run BFS</button>
+                <button className="runButton" onClick={this.generateGraph}>Reset</button>
             </div>
             
         )
