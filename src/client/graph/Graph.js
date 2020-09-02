@@ -11,9 +11,10 @@ class Graph extends Component {
         this.state = {
             s_x: 4,
             s_y: 5,
-            e_x: Infinity,
+            e_x: Infinity ,
             e_y: Infinity,
-            graph: []
+            graph: [],
+            searchType: null,
         }
         this.generateGraph = this.generateGraph.bind(this);
         this.bfs = this.bfs.bind(this); 
@@ -37,15 +38,35 @@ class Graph extends Component {
         }
         this.setState({ 
             graph: graph,
-            s_x: 4,
-            s_y: 5,
-            e_x: Infinity,
-            e_y: Infinity,
          });
     }
 
     componentDidMount() {
         this.generateGraph();
+    }
+
+    dikstra(startX, startY, endX, endY) {
+        const { graph } = this.state;
+
+        let dijk = [...graph];
+        // Dijkstra needs to maintain the distance but I didn't watnt to pollute state
+        dijk = dijk.map(arr => {
+            return arr.map(obj => {
+                obj[dist] = Infinity;
+                obj[weight] = Math.random() * 10;
+            });
+        });
+
+        let q = [];
+        let qIter = -1;
+
+
+        // Neighbors
+        const shift = [[1, 0], [0, 1], [0, -1], [-1, 0]];
+
+
+
+
     }
 
     bfs(startX, startY, endX, endY) {
@@ -81,7 +102,7 @@ class Graph extends Component {
             let current = q[qIter];
             let { x, y } = current;
 
-            const shift = [[0, 1], [1, 0], [0, -1], [-1, 0]];
+            const shift = [[1, 0], [0, 1], [0, -1], [-1, 0]];
             for (const arr of shift) {
                 if (isValid(x + arr[0], y + arr[1])) {
                     let validNeighbor = new Coordinate(x + arr[0], y + arr[1]);
@@ -197,7 +218,17 @@ class Graph extends Component {
         return false;
     }
 
+    pickSearch(event) {
+        this.setState({
+            searchType: event.target.value,
+            e_x: 0,
+            e_y: 0,
+        });
+    }
+
     pickNode(event) {
+
+        console.log('executing function')
         this.setState({
             e_x: parseInt(event.target.getAttribute('x')),
             e_y: parseInt(event.target.getAttribute('y')),
@@ -205,9 +236,11 @@ class Graph extends Component {
 
         let { s_x, s_y, e_x, e_y } = this.state;
 
-        if (e_x != Infinity && e_y != Infinity) {
-            this.dfs(s_x, s_y, e_x, e_y);
-        }
+            console.log('values received')
+            if (this.state.searchType === 'BFS')
+                this.bfs(s_x, s_y, e_x, e_y);
+            if (this.state.searchType === 'DFS')
+                this.dfs(s_x, s_y, e_x, e_y);
     }
     render() {
         return (
@@ -239,6 +272,15 @@ class Graph extends Component {
                     }) }                
                 </div>
                 <button className="runButton" onClick={this.generateGraph}>Reset</button>
+                <form>
+                    
+                    <label htmlFor="BFS">BFS</label>
+                    <input name="graph-search" type="radio" value="BFS" onClick={(e) => this.pickSearch(e)}></input>
+                    <label htmlFor="DFS">DFS</label>
+                    <input name="graph-search" type="radio" value="DFS" onClick={(e) => this.pickSearch(e)}></input>
+                </form>
+                
+                
             </div>
             
         )
