@@ -3,6 +3,7 @@ import Vertex from './Vertex'
 import './Graph.css'
 
 import Stack from '../algorithms/stack'
+import MinHeap from '../algorithms/minHeap'
 
 class Graph extends Component {
     constructor() {
@@ -56,10 +57,6 @@ class Graph extends Component {
                 obj[weight] = Math.random() * 10;
             });
         });
-
-        let q = [];
-        let qIter = -1;
-
 
         // Neighbors
         const shift = [[1, 0], [0, 1], [0, -1], [-1, 0]];
