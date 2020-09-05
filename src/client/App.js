@@ -7,15 +7,6 @@ class App extends Component {
     render() {
         return(
             <div className="main">
-                <div className="nav">
-                    <ul style={{ display: 'flex', listStyle: 'none' }}>
-                        <li>Item 1</li>
-                        <li>Item 1</li>
-                        <li>Item 1</li>
-                        <li>Item 1</li>
-                        <li>Item 1</li>
-                    </ul>
-                </div>
                 <Graph />
             </div>
         )

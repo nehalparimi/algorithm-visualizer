@@ -20,6 +20,8 @@ class Graph extends Component {
         this.generateGraph = this.generateGraph.bind(this);
         this.bfs = this.bfs.bind(this); 
         this.pickNode = this.pickNode.bind(this);
+        this.runBFS = this.runBFS.bind(this);
+        this.runDFS = this.runDFS.bind(this);
     }
 
     generateGraph() {
@@ -32,7 +34,7 @@ class Graph extends Component {
                     arr.push({ visited: -2, parent: null, inPath: 0, wall: 0 });
                     continue;
                 }
-                let t = !!(Math.random() > 0.75);
+                let t = Math.random() > 0.75;
                 arr.push({ visited: 0, parent: null, inPath: 0, wall: t });
             }
             graph.push(arr);
@@ -215,31 +217,40 @@ class Graph extends Component {
         return false;
     }
 
-    pickSearch(event) {
+    pickNode(event) {
+        let g = [...this.state.graph];
+        let x = parseInt(event.target.getAttribute('x'));
+        let y = parseInt(event.target.getAttribute('y'));
+        (g[x][y])['visted'] = -1;
         this.setState({
-            searchType: event.target.value,
-            e_x: 0,
-            e_y: 0,
+            e_x: x,
+            e_y: y,
+            graph: g,
         });
     }
 
-    pickNode(event) {
-
-        console.log('executing function')
-        this.setState({
-            e_x: parseInt(event.target.getAttribute('x')),
-            e_y: parseInt(event.target.getAttribute('y')),
-        });
-
+    runBFS() {
+        // this is the function implemented keeping in mind that we should animate it soon
+        // same with runDFS
         let { s_x, s_y, e_x, e_y } = this.state;
+        this.bfs(s_x, s_y, e_x, e_y);
+        if (this.state.e_x || this.state.e_y) {
+            this.setState({ e_x: Infinity, e_y: Infinity });
+            return;
+        }
+    }
 
-            console.log('values received')
-            if (this.state.searchType === 'BFS')
-                this.bfs(s_x, s_y, e_x, e_y);
-            if (this.state.searchType === 'DFS')
-                this.dfs(s_x, s_y, e_x, e_y);
+
+    runDFS() {  
+        let { s_x, s_y, e_x, e_y } = this.state;
+        this.dfs(s_x, s_y, e_x, e_y);
+        if (this.state.e_x || this.state.e_y) {
+            this.setState({ e_x: Infinity, e_y: Infinity });
+            return;
+        }
     }
     render() {
+        let disabled = this.state.e_x == Infinity;
         return (
             <div className="container">
                 <div className="graph" onClick={(e) => this.pickNode(e)}>
@@ -268,16 +279,9 @@ class Graph extends Component {
                         })
                     }) }                
                 </div>
-                <button className="runButton" onClick={this.generateGraph}>Reset</button>
-                <form>
-                    
-                    <label htmlFor="BFS">BFS</label>
-                    <input name="graph-search" type="radio" value="BFS" onClick={(e) => this.pickSearch(e)}></input>
-                    <label htmlFor="DFS">DFS</label>
-                    <input name="graph-search" type="radio" value="DFS" onClick={(e) => this.pickSearch(e)}></input>
-                </form>
-                
-                
+                <button className="runButton" onClick={this.runBFS} disabled={disabled}>BFS</button>
+                <button className="runButton" onClick={this.runDFS} disabled={disabled}>DFS</button>
+                <button className="runButton" onClick={this.generateGraph}>Reset</button>    
             </div>
             
         )
