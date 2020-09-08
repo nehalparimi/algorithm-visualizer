@@ -19,9 +19,12 @@ class Graph extends Component {
         }
         this.generateGraph = this.generateGraph.bind(this);
         this.bfs = this.bfs.bind(this); 
+        this.dfs = this.dfs.bind(this);
+        this.dijkstra = this.dijkstra.bind(this);
         this.pickNode = this.pickNode.bind(this);
         this.runBFS = this.runBFS.bind(this);
         this.runDFS = this.runDFS.bind(this);
+        this.runDijkstra = this.runDijkstra.bind(this);
     }
 
     generateGraph() {
@@ -31,11 +34,25 @@ class Graph extends Component {
             for (let j = 0; j < 30; ++j) {
                 if (i == this.state.s_x && j == this.state.s_y){
                     
-                    arr.push({ visited: -2, parent: null, inPath: 0, wall: 0 });
+                    arr.push({ 
+                        visited: -2, 
+                        parent: null, 
+                        inPath: 0, 
+                        wall: 0,
+                        weight: 0,
+                        initDist: 0,
+                    });
                     continue;
                 }
                 let t = Math.random() > 0.75;
-                arr.push({ visited: 0, parent: null, inPath: 0, wall: t });
+                arr.push({
+                    visited: 0,
+                    parent: null,
+                    inPath: 0,
+                    wall: 0,
+                    weight: Math.ceil(Math.random() * 10),
+                    initDist: Infinity, 
+                });
             }
             graph.push(arr);
         }
@@ -48,24 +65,86 @@ class Graph extends Component {
         this.generateGraph();
     }
 
-    dikstra(startX, startY, endX, endY) {
+    dijkstra(startX, startY, endX, endY) {
         const { graph } = this.state;
+        let visited = [...graph];
 
-        let dijk = [...graph];
-        // Dijkstra needs to maintain the distance but I didn't watnt to pollute state
-        dijk = dijk.map(arr => {
-            return arr.map(obj => {
-                obj[dist] = Infinity;
-                obj[weight] = Math.random() * 10;
-            });
+        function Coordinate(x, y, weight) {
+            this.x = x;
+            this.y = y;
+            this.weight = weight;
+        }
+
+        const q = [];
+        const shift = [[0, 1], [-1, 0], [0, -1], [1, 0]];
+
+
+        function isValid(x, y) {
+            return x >= 0 && x < graph.length
+                && y >= 0 && y < graph[x].length
+                && !visited[x][y].visited
+                && !visited[x][y].wall
+        }
+
+        let start = new Coordinate(startX, startY, 0);
+        q.push(start);
+        visited[start.x][start.y].visited = -2;
+        visited[start.x][start.y].parent = null;
+        visited[start.x][start.y].inPath = 1;
+        this.setState({
+            graph: visited
         });
 
-        // Neighbors
-        const shift = [[1, 0], [0, 1], [0, -1], [-1, 0]];
+        while (q.length) {
+            let current = q.shift();
+
+            console.log(current);
+            let { x, y } = current;
+            let priority_array = [];
+            for (const arr of shift) {
+                if (isValid(x + arr[0], y + arr[1])) {
+                    let validNeighbor = new Coordinate(x + arr[0], y + arr[1], 0);
+                    visited[validNeighbor.x][validNeighbor.y].visited = 1;
+                    visited[validNeighbor.x][validNeighbor.y].parent = current;
+                    visited[validNeighbor.x][validNeighbor.y].initDist =
+                        visited[current.x][current.y].initDist + visited[validNeighbor.x][validNeighbor.y].weight;
+                    
+                    validNeighbor.weight = visited[validNeighbor.x][validNeighbor.y].initDist;
+                    
+                    this.setState({
+                        graph: visited,
+                    });
+
+                    if (validNeighbor.x === endX && validNeighbor.y === endY) {
+                        visited[validNeighbor.x][validNeighbor.y].visited = -1;
+                        this.setState({ graph: visited });
 
 
+                        let path_x, path_y;
+                        let path_current = validNeighbor;
 
+                        while (path_current) {
+                            path_x = path_current.x;
+                            path_y = path_current.y;
 
+                            visited[path_x][path_y].inPath = 1;
+                            this.setState({ graph: visited });
+                            path_current = graph[path_current.x][path_current.y].parent;
+                        }
+
+                        this.setState({
+                            graph: visited,
+                        });
+                        return true;
+                    }
+                    priority_array.push(validNeighbor);
+                }
+            }
+            priority_array.sort(function(a, b) {
+                a.weight - b.weight;
+            });
+            priority_array.forEach(coordinate => q.push(coordinate));
+        }
     }
 
     bfs(startX, startY, endX, endY) {
@@ -234,28 +313,38 @@ class Graph extends Component {
         // same with runDFS
         let { s_x, s_y, e_x, e_y } = this.state;
         this.bfs(s_x, s_y, e_x, e_y);
-        if (this.state.e_x || this.state.e_y) {
-            this.setState({ e_x: Infinity, e_y: Infinity });
-            return;
-        }
+        // if (this.state.e_x || this.state.e_y) {
+        //     this.setState({ e_x: Infinity, e_y: Infinity });
+        //     return;
+        // }
     }
 
 
     runDFS() {  
         let { s_x, s_y, e_x, e_y } = this.state;
         this.dfs(s_x, s_y, e_x, e_y);
-        if (this.state.e_x || this.state.e_y) {
-            this.setState({ e_x: Infinity, e_y: Infinity });
-            return;
-        }
+        // if (this.state.e_x || this.state.e_y) {
+        //     this.setState({ e_x: Infinity, e_y: Infinity });
+        //     return;
+        // }
     }
+
+    runDijkstra() {
+        let { s_x, s_y, e_x, e_y } = this.state;
+        this.dijkstra(s_x, s_y, e_x, e_y);
+        // if (this.state.e_x || this.state.e_y) {
+        //     this.setState({ e_x: Infinity, e_y: Infinity });
+        //     return;
+        // }
+    }
+
     render() {
         let disabled = this.state.e_x == Infinity;
         return (
             <div className="container">
                 <div className="graph" onClick={(e) => this.pickNode(e)}>
                     { this.state.graph.map((arr, i) => {
-                        return arr.map(({visited, parent, inPath, wall}, j) => {
+                        return arr.map(({visited, parent, inPath, wall, weight}, j) => {
                             let classname;
                             switch (visited) {
                                 case -1:
@@ -275,12 +364,13 @@ class Graph extends Component {
                             }
                             if (inPath) classname += ' inPath';
                             if (wall) classname += ' wall';
-                            return <Vertex key={i + j} x={i} y={j} className={classname} />
+                            return <Vertex key={i + j} x={i} y={j} className={classname} weight={weight} />
                         })
                     }) }                
                 </div>
                 <button className="runButton" onClick={this.runBFS} disabled={disabled}>BFS</button>
                 <button className="runButton" onClick={this.runDFS} disabled={disabled}>DFS</button>
+                <button className="runButton" onClick={this.runDijkstra} disabled={disabled}>Dijkstra</button>
                 <button className="runButton" onClick={this.generateGraph}>Reset</button>    
             </div>
             
