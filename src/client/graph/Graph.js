@@ -6,8 +6,8 @@ import Stack from '../algorithms/stack'
 import MinHeap from '../algorithms/minHeap'
 
 class Graph extends Component {
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
 
         this.state = {
             s_x: 4,
@@ -15,7 +15,7 @@ class Graph extends Component {
             e_x: Infinity ,
             e_y: Infinity,
             graph: [],
-            searchType: null,
+            searchType: this.props.algo,
         }
         this.generateGraph = this.generateGraph.bind(this);
         this.bfs = this.bfs.bind(this); 
@@ -338,6 +338,10 @@ class Graph extends Component {
         // }
     }
 
+    componentDidUpdate() {
+        
+    }
+
     render() {
         let disabled = this.state.e_x == Infinity;
         return (
@@ -368,9 +372,6 @@ class Graph extends Component {
                         })
                     }) }                
                 </div>
-                <button className="runButton" onClick={this.runBFS} disabled={disabled}>BFS</button>
-                <button className="runButton" onClick={this.runDFS} disabled={disabled}>DFS</button>
-                <button className="runButton" onClick={this.runDijkstra} disabled={disabled}>Dijkstra</button>
                 <button className="runButton" onClick={this.generateGraph}>Reset</button>    
             </div>
             

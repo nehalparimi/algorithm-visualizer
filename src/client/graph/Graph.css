@@ -7,6 +7,8 @@
     display: grid;
     grid-template-columns: repeat(30, 2em);
     grid-template-rows: repeat(10, 2em);
+    bottom: 0;
+    width: 100%;
 }
 
 .runButton {
