@@ -22,3 +22,11 @@ Vertex {
     height: 1.5em;
     width: 1.5em;
 }
+
+.buttonContainer {
+    margin-top: 0.5em;
+}
+
+.buttonContainer > button {
+    margin-left: 0.2em;
+}

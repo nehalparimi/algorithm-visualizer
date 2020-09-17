@@ -3,7 +3,6 @@ import Vertex from './Vertex'
 import './Graph.css'
 
 import Stack from '../algorithms/stack'
-import MinHeap from '../algorithms/minHeap'
 
 class Graph extends Component {
     constructor() {
@@ -58,6 +57,7 @@ class Graph extends Component {
         }
         this.setState({ 
             graph: graph,
+            searchType: null,
          });
     }
 
@@ -97,17 +97,15 @@ class Graph extends Component {
 
         while (q.length) {
             let current = q.shift();
-
-            console.log(current);
             let { x, y } = current;
             let priority_array = [];
             for (const arr of shift) {
                 if (isValid(x + arr[0], y + arr[1])) {
-                    let validNeighbor = new Coordinate(x + arr[0], y + arr[1], 0);
+                    let validNeighbor = new Coordinate(x + arr[0], y + arr[1], Infinity);
                     visited[validNeighbor.x][validNeighbor.y].visited = 1;
                     visited[validNeighbor.x][validNeighbor.y].parent = current;
                     visited[validNeighbor.x][validNeighbor.y].initDist =
-                        visited[current.x][current.y].initDist + visited[validNeighbor.x][validNeighbor.y].weight;
+                        Math.min(visited[current.x][current.y].initDist + visited[validNeighbor.x][validNeighbor.y].weight, validNeighbor.weight);
                     
                     validNeighbor.weight = visited[validNeighbor.x][validNeighbor.y].initDist;
                     
@@ -141,9 +139,12 @@ class Graph extends Component {
                 }
             }
             priority_array.sort(function(a, b) {
-                a.weight - b.weight;
+                return a.weight - b.weight;
             });
-            priority_array.forEach(coordinate => q.push(coordinate));
+            console.log()
+            priority_array.forEach(coordinate => {
+                q.push(coordinate);
+            });
         }
     }
 
@@ -308,9 +309,16 @@ class Graph extends Component {
         });
     }
 
-    runBFS() {
+    updateSearchtype = (e) => {
+        this.setState({
+            searchType: e.target.value
+        })
+    }
+
+    runBFS(e) {
         // this is the function implemented keeping in mind that we should animate it soon
         // same with runDFS
+        this.updateSearchtype(e);
         let { s_x, s_y, e_x, e_y } = this.state;
         this.bfs(s_x, s_y, e_x, e_y);
         // if (this.state.e_x || this.state.e_y) {
@@ -320,7 +328,8 @@ class Graph extends Component {
     }
 
 
-    runDFS() {  
+    runDFS(e) {  
+        this.updateSearchtype(e);
         let { s_x, s_y, e_x, e_y } = this.state;
         this.dfs(s_x, s_y, e_x, e_y);
         // if (this.state.e_x || this.state.e_y) {
@@ -329,7 +338,8 @@ class Graph extends Component {
         // }
     }
 
-    runDijkstra() {
+    runDijkstra(e) {
+        this.updateSearchtype(e);
         let { s_x, s_y, e_x, e_y } = this.state;
         this.dijkstra(s_x, s_y, e_x, e_y);
         // if (this.state.e_x || this.state.e_y) {
@@ -342,36 +352,41 @@ class Graph extends Component {
         let disabled = this.state.e_x == Infinity;
         return (
             <div className="container">
-                <div className="graph" onClick={(e) => this.pickNode(e)}>
-                    { this.state.graph.map((arr, i) => {
-                        return arr.map(({visited, parent, inPath, wall, weight}, j) => {
-                            let classname;
-                            switch (visited) {
-                                case -1:
-                                    classname = 'finish';
-                                    break;
-                                case -2:
-                                    classname = 'start';
-                                    break;
-                                case 0:
-                                    classname = 'unvisited';
-                                    break;
-                                case 1:
-                                    classname = 'visited'
-                                    break;
-                                default:
-                                    break;
-                            }
-                            if (inPath) classname += ' inPath';
-                            if (wall) classname += ' wall';
-                            return <Vertex key={i + j} x={i} y={j} className={classname} weight={weight} />
-                        })
-                    }) }                
-                </div>
-                <button className="runButton" onClick={this.runBFS} disabled={disabled}>BFS</button>
-                <button className="runButton" onClick={this.runDFS} disabled={disabled}>DFS</button>
-                <button className="runButton" onClick={this.runDijkstra} disabled={disabled}>Dijkstra</button>
-                <button className="runButton" onClick={this.generateGraph}>Reset</button>    
+               <div>
+                    <div className="graph" onClick={(e) => this.pickNode(e)}>
+                        { this.state.graph.map((arr, i) => {
+                            return arr.map(({visited, parent, inPath, wall, weight}, j) => {
+                                let classname;
+                                weight = this.state.searchType != 'dijkstra' ? ' ' : weight
+                                switch (visited) {
+                                    case -1:
+                                        classname = 'finish';
+                                        break;
+                                    case -2:
+                                        classname = 'start';
+                                        break;
+                                    case 0:
+                                        classname = 'unvisited';
+                                        break;
+                                    case 1:
+                                        classname = 'visited'
+                                        break;
+                                    default:
+                                        break;
+                                }
+                                if (inPath) classname += ' inPath';
+                                if (wall) classname += ' wall';
+                                return <Vertex key={i + j} x={i} y={j} className={classname} weight={weight} />
+                            })
+                        }) }                
+                    </div>
+                    <div className="buttonContainer">
+                        <button value="bfs" className="runButton" onClick={this.runBFS} disabled={disabled}>BFS</button>
+                        <button value="dfs" className="runButton" onClick={this.runDFS} disabled={disabled}>DFS</button>
+                        <button value="dijkstra" className="runButton" onClick={this.runDijkstra} disabled={disabled}>Dijkstra</button>
+                        <button className="runButton" onClick={this.generateGraph}>Reset</button> 
+                    </div> 
+               </div>  
             </div>
             
         )
