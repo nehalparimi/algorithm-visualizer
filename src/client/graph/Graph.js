@@ -21,9 +21,9 @@ class Graph extends Component {
         this.dfs = this.dfs.bind(this);
         this.dijkstra = this.dijkstra.bind(this);
         this.pickNode = this.pickNode.bind(this);
-        this.runBFS = this.runBFS.bind(this);
-        this.runDFS = this.runDFS.bind(this);
-        this.runDijkstra = this.runDijkstra.bind(this);
+        // this.runBFS = this.runBFS.bind(this);
+        // this.runDFS = this.runDFS.bind(this);
+        // this.runDijkstra = this.runDijkstra.bind(this);
     }
 
     generateGraph() {
@@ -55,10 +55,7 @@ class Graph extends Component {
             }
             graph.push(arr);
         }
-        this.setState({ 
-            graph: graph,
-            searchType: null,
-         });
+        this.setState({ graph: graph });
     }
 
     componentDidMount() {
@@ -315,37 +312,14 @@ class Graph extends Component {
         })
     }
 
-    runBFS(e) {
-        // this is the function implemented keeping in mind that we should animate it soon
-        // same with runDFS
-        this.updateSearchtype(e);
-        let { s_x, s_y, e_x, e_y } = this.state;
-        this.bfs(s_x, s_y, e_x, e_y);
-        // if (this.state.e_x || this.state.e_y) {
-        //     this.setState({ e_x: Infinity, e_y: Infinity });
-        //     return;
-        // }
-    }
-
-
-    runDFS(e) {  
-        this.updateSearchtype(e);
-        let { s_x, s_y, e_x, e_y } = this.state;
-        this.dfs(s_x, s_y, e_x, e_y);
-        // if (this.state.e_x || this.state.e_y) {
-        //     this.setState({ e_x: Infinity, e_y: Infinity });
-        //     return;
-        // }
-    }
-
-    runDijkstra(e) {
-        this.updateSearchtype(e);
-        let { s_x, s_y, e_x, e_y } = this.state;
-        this.dijkstra(s_x, s_y, e_x, e_y);
-        // if (this.state.e_x || this.state.e_y) {
-        //     this.setState({ e_x: Infinity, e_y: Infinity });
-        //     return;
-        // }
+    callFunction = () => {
+        const { searchType, s_x, s_y, e_x, e_y } = this.state;
+        if (searchType == 'bfs')
+            this.bfs(s_x, s_y, e_x, e_y);
+        else if (searchType == 'dfs')
+            this.dfs(s_x, s_y, e_x, e_y);
+        else if (searchType == 'dijkstra')
+            this.dijkstra(s_x, s_y, e_x, e_y);
     }
 
     render() {
@@ -381,10 +355,23 @@ class Graph extends Component {
                         }) }                
                     </div>
                     <div className="buttonContainer">
-                        
-                        <button value="bfs" className="runButton" onClick={this.runBFS} disabled={disabled}>BFS</button>
-                        <button value="dfs" className="runButton" onClick={this.runDFS} disabled={disabled}>DFS</button>
-                        <button value="dijkstra" className="runButton" onClick={this.runDijkstra} disabled={disabled}>Dijkstra</button>
+                        {/* <ul className="algoChoice">
+                            <li>Hey</li>
+                            <li>Hey</li>
+                            <li>Hey</li>
+                            <li>Hey</li>
+                        </ul> */}
+                        <select onChange={this.updateSearchtype} id="dropdownChoiceContainer">
+                            <option value="">Select your option</option>
+                            <option className="dropdownChoice" value="bfs">bfs</option>
+                            <option className="dropdownChoice" value="dfs">dfs</option>
+                            <option className="dropdownChoice" value="dijkstra">dijkstra</option>
+                        </select>
+                        <button className="runButton" onClick={this.callFunction} disabled={disabled}>Run</button>
+
+                        {/* <button value="bfs" className="runButton" onClick={this.runBFS} disabled={disabled}>BFS</button> */}
+                        {/* <button value="dfs" className="runButton" onClick={this.runDFS} disabled={disabled}>DFS</button> */}
+                        {/* <button value="dijkstra" className="runButton" onClick={this.runDijkstra} disabled={disabled}>Dijkstra</button> */}
                         <button className="runButton" onClick={this.generateGraph}>Reset</button> 
                     </div> 
                </div>  

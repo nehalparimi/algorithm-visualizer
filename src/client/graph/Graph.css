@@ -40,3 +40,11 @@ Vertex {
     text-transform: uppercase;
     text-align: center;
 }
+
+.dropdownChoiceContainer {
+
+}
+
+.dropdownChoice {
+    text-transform: uppercase;
+}
