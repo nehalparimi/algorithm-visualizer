@@ -381,6 +381,7 @@ class Graph extends Component {
                         }) }                
                     </div>
                     <div className="buttonContainer">
+                        
                         <button value="bfs" className="runButton" onClick={this.runBFS} disabled={disabled}>BFS</button>
                         <button value="dfs" className="runButton" onClick={this.runDFS} disabled={disabled}>DFS</button>
                         <button value="dijkstra" className="runButton" onClick={this.runDijkstra} disabled={disabled}>Dijkstra</button>
