@@ -19,7 +19,7 @@ class App extends Component {
         const { algo } = this.state;
         return(
             <div className="main">
-                <Nav algorithmPicked={this.algorithmPicked} />
+                {/* <Nav algorithmPicked={this.algorithmPicked} /> */}
                 <Graph algo={algo} />
             </div>
         )
